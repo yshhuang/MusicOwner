@@ -63,6 +63,26 @@ const $882b6d93070905b3$var$pluginInstance = {
 module.exports = {
     platform: "MusicOwner",
     version: "1.0.0",
+    srcUrl: "https://gitee.com/yshhuang/MusicOwner/raw/master/dist/plugin.js",
+    userVariables: [
+        {
+            key: "url",
+            name: "WebDAV地址"
+        },
+        {
+            key: "username",
+            name: "用户名"
+        },
+        {
+            key: "password",
+            name: "密码",
+            type: "password"
+        },
+        {
+            key: "searchPath",
+            name: "存放歌曲的路径"
+        }
+    ],
     search: $882b6d93070905b3$var$search
 };
 
