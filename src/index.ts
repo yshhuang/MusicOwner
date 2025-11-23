@@ -75,7 +75,7 @@ async function searchMusic(query: string) {
           (await client.getDirectoryContents(search)) as FileStat[]
         ).filter((it) => it.type === "file" && it.mime.startsWith("audio"));
         result = [...result, ...fileItems];
-      } catch {}
+      } catch { }
     }
     cachedData.cacheFileList = result;
   }
@@ -108,5 +108,24 @@ const pluginInstance: IPlugin.IPluginDefine = {
 module.exports = {
   platform: "MusicOwner",
   version: "1.0.0",
+  userVariables: [
+    {
+      key: "url",
+      name: "WebDAV地址",
+    },
+    {
+      key: "username",
+      name: "用户名",
+    },
+    {
+      key: "password",
+      name: "密码",
+      type: "password",
+    },
+    {
+      key: "searchPath",
+      name: "存放歌曲的路径",
+    },
+  ],
   search
 }
