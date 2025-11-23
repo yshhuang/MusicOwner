@@ -108,6 +108,7 @@ const pluginInstance: IPlugin.IPluginDefine = {
 module.exports = {
   platform: "MusicOwner",
   version: "1.0.0",
+  srcUrl: "https://gitee.com/yshhuang/MusicOwner/raw/master/dist/plugin.js",
   userVariables: [
     {
       key: "url",
