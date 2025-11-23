@@ -123,10 +123,10 @@ module.exports = {
       name: "存放歌曲的路径",
     },
   ],
-  version: "0.0.3",
+  version: "0.0.4",
   supportedSearchType: ["music"],
   srcUrl:
-    "https://gitee.com/yshhuang/MusicOwner/raw/master/dist/plugin.js",
+    "https://gitee.com/yshhuang/MusicOwner/raw/main/dist/plugin.js",
   cacheControl: "no-cache",
   search(query, page, type) {
     if (type === "music") {
