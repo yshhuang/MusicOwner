@@ -102,7 +102,7 @@ async function getTopListDetail(topListItem: IMusicSheet.IMusicSheetItem) {
 
 module.exports = {
   platform: "MusicOwner",
-  author: "猫头猫",
+  author: "yshhuang",
   description: "使用此插件前先配置用户变量",
   userVariables: [
     {
