@@ -1,23 +1,3 @@
-import axios from 'axios';
-import cheerio from 'cheerio';
-import cryptojs from 'crypto-js';
-import dayjs from 'dayjs';
-import bigInt from 'big-integer';
-import he from 'he';
-import qs from 'qs';
-
-// TODO: 你可以在这里写插件的逻辑
-
-// 注意：不要使用async () => {}，hermes不支持异步箭头函数
-const search: IPlugin.ISearchFunc = async function (query, page, type) {
-  if (type === 'music') {
-    return {
-      isEnd: true,
-      data: []
-    }
-  };
-}
-
 import { AuthType, FileStat, createClient } from "webdav";
 
 interface ICachedData {
@@ -28,7 +8,6 @@ interface ICachedData {
   searchPathList?: string[];
   cacheFileList?: FileStat[];
 }
-
 let cachedData: ICachedData = {};
 
 function getClient() {
@@ -75,7 +54,7 @@ async function searchMusic(query: string) {
           (await client.getDirectoryContents(search)) as FileStat[]
         ).filter((it) => it.type === "file" && it.mime.startsWith("audio"));
         result = [...result, ...fileItems];
-      } catch { }
+      } catch {}
     }
     cachedData.cacheFileList = result;
   }
@@ -93,22 +72,38 @@ async function searchMusic(query: string) {
   };
 }
 
-const pluginInstance: IPlugin.IPluginDefine = {
-  platform: "MusicOwner",
-  version: "1.0.0",
-  // TODO: 在这里把插件剩余的功能补充完整
+async function getTopLists() {
+  getClient();
+  const data = {
+    title: "全部歌曲",
+    data: (cachedData.searchPathList || []).map((it) => ({
+      title: it,
+      id: it,
+    })),
+  };
+  return [data];
+}
 
-  search: search,
+async function getTopListDetail(topListItem: IMusicSheet.IMusicSheetItem) {
+  const client = getClient();
+  const fileItems = (
+    (await client.getDirectoryContents(topListItem.id)) as FileStat[]
+  ).filter((it) => it.type === "file" && it.mime.startsWith("audio"));
 
-};
-
-
-// export default pluginInstance;
+  return {
+    musicList: fileItems.map((it) => ({
+      title: it.basename,
+      id: it.filename,
+      artist: "未知作者",
+      album: "未知专辑",
+    })),
+  };
+}
 
 module.exports = {
   platform: "MusicOwner",
-  version: "1.0.0",
-  srcUrl: "https://gitee.com/yshhuang/MusicOwner/raw/master/dist/plugin.js",
+  author: "猫头猫",
+  description: "使用此插件前先配置用户变量",
   userVariables: [
     {
       key: "url",
@@ -128,5 +123,22 @@ module.exports = {
       name: "存放歌曲的路径",
     },
   ],
-  search
-}
+  version: "0.0.2",
+  supportedSearchType: ["music"],
+  srcUrl:
+    "https://gitee.com/maotoumao/MusicFreePlugins/raw/v0.1/dist/webdav/index.js",
+  cacheControl: "no-cache",
+  search(query, page, type) {
+    if (type === "music") {
+      return searchMusic(query);
+    }
+  },
+  getTopLists,
+  getTopListDetail,
+  getMediaSource(musicItem) {
+    const client = getClient();
+    return {
+      url: client.getFileDownloadLink(musicItem.id),
+    };
+  },
+};

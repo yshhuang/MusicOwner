@@ -1,14 +1,6 @@
 var $8zHUo$webdav = require("webdav");
 
 
-// TODO: 你可以在这里写插件的逻辑
-// 注意：不要使用async () => {}，hermes不支持异步箭头函数
-const $882b6d93070905b3$var$search = async function(query, page, type) {
-    if (type === "music") return {
-        isEnd: true,
-        data: []
-    };
-};
 let $882b6d93070905b3$var$cachedData = {};
 function $882b6d93070905b3$var$getClient() {
     const { url: url, username: username, password: password, searchPath: searchPath } = env?.getUserVariables?.() ?? {};
@@ -53,17 +45,35 @@ async function $882b6d93070905b3$var$searchMusic(query) {
             }))
     };
 }
-const $882b6d93070905b3$var$pluginInstance = {
-    platform: "MusicOwner",
-    version: "1.0.0",
-    // TODO: 在这里把插件剩余的功能补充完整
-    search: $882b6d93070905b3$var$search
-};
-// export default pluginInstance;
+async function $882b6d93070905b3$var$getTopLists() {
+    $882b6d93070905b3$var$getClient();
+    const data = {
+        title: "全部歌曲",
+        data: ($882b6d93070905b3$var$cachedData.searchPathList || []).map((it)=>({
+                title: it,
+                id: it
+            }))
+    };
+    return [
+        data
+    ];
+}
+async function $882b6d93070905b3$var$getTopListDetail(topListItem) {
+    const client = $882b6d93070905b3$var$getClient();
+    const fileItems = (await client.getDirectoryContents(topListItem.id)).filter((it)=>it.type === "file" && it.mime.startsWith("audio"));
+    return {
+        musicList: fileItems.map((it)=>({
+                title: it.basename,
+                id: it.filename,
+                artist: "未知作者",
+                album: "未知专辑"
+            }))
+    };
+}
 module.exports = {
     platform: "MusicOwner",
-    version: "1.0.0",
-    srcUrl: "https://gitee.com/yshhuang/MusicOwner/raw/master/dist/plugin.js",
+    author: "猫头猫",
+    description: "使用此插件前先配置用户变量",
     userVariables: [
         {
             key: "url",
@@ -83,7 +93,23 @@ module.exports = {
             name: "存放歌曲的路径"
         }
     ],
-    search: $882b6d93070905b3$var$search
+    version: "0.0.2",
+    supportedSearchType: [
+        "music"
+    ],
+    srcUrl: "https://gitee.com/maotoumao/MusicFreePlugins/raw/v0.1/dist/webdav/index.js",
+    cacheControl: "no-cache",
+    search (query, page, type) {
+        if (type === "music") return $882b6d93070905b3$var$searchMusic(query);
+    },
+    getTopLists: $882b6d93070905b3$var$getTopLists,
+    getTopListDetail: $882b6d93070905b3$var$getTopListDetail,
+    getMediaSource (musicItem) {
+        const client = $882b6d93070905b3$var$getClient();
+        return {
+            url: client.getFileDownloadLink(musicItem.id)
+        };
+    }
 };
 
 
