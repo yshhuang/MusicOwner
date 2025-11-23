@@ -1,7 +1,7 @@
 {
-  "name": "MusicFreePluginTemplate",
+  "name": "music_owner",
   "version": "1.0.0",
-  "description": "MusicFree插件模板",
+  "description": "MusicFree自用插件",
   "source": "src/index.ts",
   "main": "dist/plugin.js",
   "scripts": {
@@ -11,8 +11,8 @@
   },
   "keywords": [],
   "author": {
-    "name": "猫头猫",
-    "email": "lhx_xjtu@163.com"
+    "name": "yshhuang",
+    "email": "yshhuang@foxmail.com"
   },
   "license": "MIT",
   "dependencies": {
@@ -23,7 +23,8 @@
     "crypto-js": "^4.1.1",
     "dayjs": "^1.11.4",
     "he": "^1.2.0",
-    "qs": "^6.11.0"
+    "qs": "^6.11.0",
+    "webdav": "^5.8.0"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.1",

@@ -10,7 +10,7 @@ import qs from 'qs';
 
 // 注意：不要使用async () => {}，hermes不支持异步箭头函数
 const search: IPlugin.ISearchFunc = async function (query, page, type) {
-  if(type === 'music') {
+  if (type === 'music') {
     return {
       isEnd: true,
       data: []
@@ -18,13 +18,95 @@ const search: IPlugin.ISearchFunc = async function (query, page, type) {
   };
 }
 
+import { AuthType, FileStat, createClient } from "webdav";
+
+interface ICachedData {
+  url?: string;
+  username?: string;
+  password?: string;
+  searchPath?: string;
+  searchPathList?: string[];
+  cacheFileList?: FileStat[];
+}
+
+let cachedData: ICachedData = {};
+
+function getClient() {
+  const { url, username, password, searchPath } =
+    env?.getUserVariables?.() ?? {};
+  if (!(url && username && password)) {
+    return null;
+  }
+
+  if (
+    !(
+      cachedData.url === url &&
+      cachedData.username === username &&
+      cachedData.password === password &&
+      cachedData.searchPath === searchPath
+    )
+  ) {
+    cachedData.url = url;
+    cachedData.username = username;
+    cachedData.password = password;
+    cachedData.searchPath = searchPath;
+    cachedData.searchPathList = searchPath?.split?.(",");
+    cachedData.cacheFileList = null;
+  }
+
+  return createClient(url, {
+    authType: AuthType.Password,
+    username,
+    password,
+  });
+}
+
+async function searchMusic(query: string) {
+  const client = getClient();
+  if (!cachedData.cacheFileList) {
+    const searchPathList = cachedData.searchPathList?.length
+      ? cachedData.searchPathList
+      : ["/"];
+    let result: FileStat[] = [];
+
+    for (let search of searchPathList) {
+      try {
+        const fileItems = (
+          (await client.getDirectoryContents(search)) as FileStat[]
+        ).filter((it) => it.type === "file" && it.mime.startsWith("audio"));
+        result = [...result, ...fileItems];
+      } catch {}
+    }
+    cachedData.cacheFileList = result;
+  }
+
+  return {
+    isEnd: true,
+    data: (cachedData.cacheFileList ?? [])
+      .filter((it) => it.basename.includes(query))
+      .map((it) => ({
+        title: it.basename,
+        id: it.filename,
+        artist: "未知作者",
+        album: "未知专辑",
+      })),
+  };
+}
 
 const pluginInstance: IPlugin.IPluginDefine = {
-  platform: "插件名",
-  version: "0.0.0",
+  platform: "MusicOwner",
+  version: "1.0.0",
   // TODO: 在这里把插件剩余的功能补充完整
-  search
+
+  search: search,
+
 };
 
 
-export default pluginInstance;
+// export default pluginInstance;
+
+module.exports = {
+  platform: "MusicOwner",
+  version: "1.0.0",
+  search
+}
